@@ -15,7 +15,6 @@ const getEntries = async () => {
             createdAt: "desc",
         },
     })
-    await analyze("What is the best flavor ice cream ever?")
 
     return entries
 }
