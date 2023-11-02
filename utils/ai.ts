@@ -22,11 +22,15 @@ const parser = StructuredOutputParser.fromZodSchema(
             .describe(
                 "a hexidecimal color code that represents the mood of the entry. Example #0101fe for blue representing happiness."
             ),
+        sentimentScore: z
+            .number()
+            .describe(
+                "sentiment of the text and rated on a scale from -10 to 10, where -10 is extremely negative, 0 is neutral, and 10 is extremely positive."
+            ),
     })
 )
 
 const getPrompt = async (content) => {
-    console.log("Content from GET PROMPT")
     const format_instructions = parser.getFormatInstructions()
 
     const prompt = new PromptTemplate({
@@ -39,8 +43,6 @@ const getPrompt = async (content) => {
     const input = await prompt.format({
         entry: content,
     })
-
-    console.log("Input", input)
 
     return input
 }

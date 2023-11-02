@@ -17,6 +17,7 @@ export const POST = async () => {
     const analysis = await analyze(entry)
     await prisma.analysis.create({
         data: {
+            userId: user.id,
             entryId: entry.id,
             ...analysis,
         },
