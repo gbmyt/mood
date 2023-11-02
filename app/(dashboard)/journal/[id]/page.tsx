@@ -11,20 +11,23 @@ const getEntry = async (id) => {
                 id,
             },
         },
+        include: {
+            analysis: true,
+        },
     })
-    include: {
-        analysis: true
-    }
     return entry
 }
 
 const EntryPage = async ({ params }) => {
     const entry = await getEntry(params.id)
+    const { mood, summary, color, subject, negative } = entry?.analysis
+
     const analysisData = [
-        { name: "Summary", value: "" },
-        { name: "Subject", value: "" },
-        { name: "Mood", value: "" },
-        { name: "Negative", value: false },
+        { name: "Summary", value: summary },
+        { name: "Subject", value: subject },
+        { name: "Mood", value: mood },
+        { name: "Color", value: color },
+        { name: "Negative", value: negative ? "True" : "False" },
     ]
 
     return (
@@ -34,7 +37,7 @@ const EntryPage = async ({ params }) => {
             </div>
 
             <div className="border-l border-black/10">
-                <div className="bg-blue-300 px-6 py-10">
+                <div className="px-6 py-10" style={{ backgroundColor: color }}>
                     <h2 className="text-2xl">Analysis</h2>
                 </div>
                 <div className="">

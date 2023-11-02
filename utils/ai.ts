@@ -1,5 +1,5 @@
-import { PromptTemplate } from "langchain"
 import { OpenAI } from "langchain/llms/openai"
+import { PromptTemplate } from "langchain"
 import { StructuredOutputParser } from "langchain/output_parsers"
 import z from "zod"
 
@@ -10,38 +10,37 @@ const parser = StructuredOutputParser.fromZodSchema(
         mood: z
             .string()
             .describe("the mood of the person who wrote the journal entry."),
-        subject: z.string().describe("the subject of the entry"),
+        subject: z.string().describe("the subject of the journal entry."),
+        negative: z
+            .boolean()
+            .describe(
+                "is the journal entry negative? (i.e. does it contain negative emotions?)."
+            ),
         summary: z.string().describe("quick summary of the entire entry."),
         color: z
             .string()
             .describe(
-                "A hexidecimal color code that represents the mood of the entry. Example #0101fe for blue representing happiness."
-            ),
-        negative: z
-            .boolean()
-            .describe(
-                "is the journal entry negative? (i.e. does it contain negative emotions?)"
+                "a hexidecimal color code that represents the mood of the entry. Example #0101fe for blue representing happiness."
             ),
     })
 )
 
 const getPrompt = async (content) => {
-    // use the parser to get formatting instructions
+    console.log("Content from GET PROMPT")
     const format_instructions = parser.getFormatInstructions()
 
-    // Preemptively feed langchain a template for the prompt
     const prompt = new PromptTemplate({
         template:
-            "Analyze the following journal entry. Follow the instructions and format your response to match the format instructions, no matter what! \n {format_instructions}\n{entry}",
+            "Analyze the following journal entry. Follow the intrusctions and format your response to match the format instructions, no matter what! \n{format_instructions}\n{entry}",
         inputVariables: ["entry"],
         partialVariables: { format_instructions },
     })
 
-    // format the prompt using user-generated content and return result
     const input = await prompt.format({
         entry: content,
     })
-    console.log("Input was:", input)
+
+    console.log("Input", input)
 
     return input
 }
@@ -49,14 +48,15 @@ const getPrompt = async (content) => {
 // Feed the prompt to OpenAI and grab/log/do something to the result.
 // temperature = 'silliness' level. Level of accepted deviation from 'accepted' or 'accurate' responses in reality.
 export const analyze = async (entry) => {
+    console.log("Entry from analyze", entry)
     const input = await getPrompt(entry.content)
-    const model = new OpenAI({ temperature: 0, modelName: "gpt-3.5-turbo" }) // default modelName 4 costs $$
-    const result = await model.call(input)
+    const model = new OpenAI({ temperature: 0, modelName: "gpt-3.5-turbo" })
+    const output = await model.call(input)
 
-    // console.log("Prompt Result", result)
+    console.log("Prompt Output", output)
 
     try {
-        return parser.parse(result)
+        return parser.parse(output)
     } catch (e) {
         console.log("There was a problem: ", e)
     }
