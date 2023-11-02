@@ -50,12 +50,9 @@ const getPrompt = async (content) => {
 // Feed the prompt to OpenAI and grab/log/do something to the result.
 // temperature = 'silliness' level. Level of accepted deviation from 'accepted' or 'accurate' responses in reality.
 export const analyze = async (entry) => {
-    console.log("Entry from analyze", entry)
     const input = await getPrompt(entry.content)
     const model = new OpenAI({ temperature: 0, modelName: "gpt-3.5-turbo" })
     const output = await model.call(input)
-
-    console.log("Prompt Output", output)
 
     try {
         return parser.parse(output)
